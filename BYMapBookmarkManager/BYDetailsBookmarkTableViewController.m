@@ -35,6 +35,9 @@
     if ([self.bookmark.title isEqualToString:@"Unnamed"]) {
         [self actionLoadNearbyPlaces:self.loadPlacesButton];
     }
+    
+    UIBarButtonItem* trashBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(actionDeleteBookmark:)];
+    self.navigationItem.rightBarButtonItem = trashBarButtonItem;
 
 }
 
@@ -146,6 +149,27 @@
     [mainVC.mapView setCenterCoordinate:self.bookmark.coordinate animated:YES];
     
     [self.navigationController popToRootViewControllerAnimated:YES];
+    
+}
+
+- (void)actionDeleteBookmark:(UIBarButtonItem*)sender {
+    
+    UIAlertController* ac = [UIAlertController alertControllerWithTitle:nil message:@"Are you sure?" preferredStyle:UIAlertControllerStyleActionSheet];
+    UIAlertAction* alertAction = [UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
+        
+        BYPlaceAnnotation* annotation = self.bookmark;
+        BYBookmarkLocation* bookmarkObject = self.bookmark.bookmark;
+        
+        BYMainViewController* mainVC = [self.navigationController.viewControllers firstObject];
+        [self.dataManager.managedObjectContext deleteObject:bookmarkObject];
+        [self.dataManager saveContext];
+        [mainVC.mapView removeAnnotation:annotation];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+        
+    }];
+    
+    [ac addAction:alertAction];
+    [self presentViewController:ac animated:YES completion:nil];
     
 }
 
